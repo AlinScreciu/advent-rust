@@ -17,7 +17,7 @@ fn main() {
     }
     let mut gamma: i64 = 0;
     let mut eps: i64 = 0;
-    let rt: (i32, i32) = get_ogr(lines);
+    let rt: (i32, i32) = get_lsr(lines);
     let base: i64 = 2;
     for i in 0..(mc_bits_row.len()) {
         if mc_bits_row[i] >= 1 {
@@ -31,7 +31,7 @@ fn main() {
     println!("Power consumption: {}", gamma * eps);
     println!("Life support rating: {}", rt.0 * rt.1);
 }
-fn get_ogr(_lines: Vec<String>) -> (i32, i32) {
+fn get_lsr(_lines: Vec<String>) -> (i32, i32) {
     let mut ogr: i32 = 0;
     let mut csr: i32 = 0;
     let mut lines: Vec<String> = _lines.clone();
