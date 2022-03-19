@@ -23,7 +23,6 @@ fn main() {
         .collect();
     let mut boards: Vec<Vec<Vec<Number>>> = Vec::new();
     let mut board: Vec<Vec<Number>> = Vec::new();
-
     for line in lines.iter() {
         if line == "" {
             continue;
@@ -42,10 +41,15 @@ fn main() {
             continue;
         }
     }
+
     '_outer: for call in moves.iter() {
-        let (mut _cm, mut _rm): (bool, bool) = (true, true);
-        for b in 0..boards.len() {
+        if boards.len() == 0 {
+            break;
+        }
+        let mut b: usize = 0;
+        'outer: while b < boards.len() {
             for i in 0..5 {
+                let mut col_m: bool = true;
                 for j in 0..5 {
                     if boards[b][i][j].val == *call {
                         boards[b][i][j].marked = true;
@@ -53,46 +57,30 @@ fn main() {
                     if boards[b][j][i].val == *call {
                         boards[b][j][i].marked = true;
                     }
+                    col_m = col_m && boards[b][j][i].marked;
+                    if j == 4 {
+                        if boards[b][i].iter().all(|x| x.marked) || col_m {
+                            let mut sum: u128 = 0;
+                            for x in 0..5 {
+                                for y in 0..5 {
+                                    if !boards[b][x][y].marked {
+                                        sum += boards[b][x][y].val;
+                                    }
+                                }
+                            }
+                            println!("Won, score {}", sum * call);
+                            boards.remove(b);
+                            if boards.len() == 0 {
+                                break 'outer;
+                            }
+                            continue 'outer;
+                        }
+                    }
                 }
             }
-        }
-
-        for board in boards.iter() {
-            if check_board(board.clone(), *call) {
-                println!();
-                break '_outer;
-            }
+            b += 1;
         }
     }
-}
-fn check_board(board: Vec<Vec<Number>>, call: u128) -> bool {
-    let row_m: bool = board
-        .iter()
-        .any(|row| row.iter().all(|val: &Number| val.marked));
-    let mut trans_b: Vec<Vec<Number>> = Vec::new();
-    for i in 0..5 {
-        let mut col: Vec<Number> = Vec::new();
-        for j in 0..5 {
-            col.push(board[j][i].clone());
-        }
-        trans_b.push(col.clone());
-    }
-    let col_m: bool = trans_b
-        .iter()
-        .any(|col| col.iter().all(|val: &Number| val.marked));
-
-    let mut sum: u128 = 0;
-    if row_m || col_m {
-        for i in 0..5 {
-            for j in 0..5 {
-                if !board[i][j].marked {
-                    sum += board[i][j].val;
-                }
-            }
-        }
-        println!("First final score is: {}", sum * call);
-    }
-    return row_m || col_m;
 }
 
 fn load_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
