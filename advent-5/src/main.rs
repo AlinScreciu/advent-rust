@@ -8,8 +8,8 @@ const INPUT: &str = "input.txt";
 
 #[derive(Eq, PartialEq, Hash, Copy, Clone)]
 struct Point {
-    x: usize,
-    y: usize,
+    x: i64,
+    y: i64,
 }
 impl fmt::Display for Point {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -20,8 +20,8 @@ impl fmt::Display for Point {
 fn make_point(input: &str) -> Point {
     let mut split = input.trim().split(",");
     Point {
-        x: split.next().unwrap().parse::<usize>().unwrap(),
-        y: split.next().unwrap().parse::<usize>().unwrap(),
+        x: split.next().unwrap().parse::<i64>().unwrap(),
+        y: split.next().unwrap().parse::<i64>().unwrap(),
     }
 }
 fn main() {
@@ -38,7 +38,7 @@ fn main() {
     for point in points.iter() {
         pointset.entry(*point).or_insert(vec![]).push(*point);
     }
-    let mut dups: usize = 0;
+    let mut dups: i64 = 0;
     for (_, v) in &pointset {
         if v.len() > 1 {
             dups += 1;
@@ -64,25 +64,32 @@ fn read_points(lines: Vec<String>) -> Vec<Point> {
 
 fn make_segment(p1: Point, p2: Point) -> Option<Vec<Point>> {
     let mut points: Vec<Point> = Vec::new();
-    if p1.x != p2.x && p1.y != p2.y {
-        return None;
-    }
+    let max_x: i64 = cmp::max::<i64>(p1.x, p2.x);
+    let min_x: i64 = cmp::min::<i64>(p1.x, p2.x);
+    let max_y: i64 = cmp::max::<i64>(p1.y, p2.y);
+    let min_y: i64 = cmp::min::<i64>(p1.y, p2.y);
     if p1.y == p2.y {
-        let max_x: usize = cmp::max::<usize>(p1.x, p2.x);
-        let min_x: usize = cmp::min::<usize>(p1.x, p2.x);
         for i in min_x..(max_x + 1) {
             points.push(Point { x: i, y: p1.y });
         }
     } else if p1.x == p2.x {
-        let max_y: usize = cmp::max::<usize>(p1.y, p2.y);
-        let min_y: usize = cmp::min::<usize>(p1.y, p2.y);
         for i in min_y..(max_y + 1) {
             points.push(Point { x: p1.x, y: i });
         }
+    } else {
+        let gradient: f32 = ((p2.y - p1.y) as f32) / ((p2.x - p1.x) as f32);
+        
+        for i in min_x..(max_x+1) {
+            points.push(point_gen(p1, gradient, i).clone());
+        }
     }
+
     return Some(points);
 }
-
+fn point_gen(p: Point, m: f32, x: i64) -> Point {
+    let y: i64 = ((p.y as f32) + m * ((x - p.x) as f32)) as i64;
+    Point { x: (x), y: (y) }
+}
 fn load_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
 where
     P: AsRef<Path>,
